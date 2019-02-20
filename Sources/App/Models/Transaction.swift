@@ -25,3 +25,8 @@ final class Transaction: Content, Equatable {
     }
 }
 
+extension Transaction: CustomStringConvertible {
+    var description: String {
+        return "from: \(from) to: \(to) amount: \(amount)"
+    }
+}

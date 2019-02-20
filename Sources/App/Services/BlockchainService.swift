@@ -95,6 +95,7 @@ class BlockchainService {
     }
     
     func verifyBlock(miner: String, block: Block) throws -> [String: String] {
+//        print("verifying block \(block)")
         guard
             let index = block.index,
             let hash = block.hash,
@@ -114,6 +115,7 @@ class BlockchainService {
             hash.hasPrefix("0000"),
             sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
         else {
+            print("verifying \(stringToSha) index: \(index) nounce: \(block.nounce!)")
             throw BlockchainServiceError.badBlock("Faulty hash \(hash) not \(sha256(string: stringToSha, index: index, nounce: block.nounce!))")
         }
         
