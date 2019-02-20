@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import CommonCrypto
 
+import CryptoSwift
 import Vapor
 
 final class Blockchain: Content {
@@ -29,7 +29,7 @@ final class Blockchain: Content {
         let string = String(data: try! JSONEncoder().encode(block.transactions), encoding: .utf8)!
         var foundHash: String = ""
         var foundNounce: UInt = 0
-        while foundHash.hasPrefix("00") == false {
+        while foundHash.hasPrefix("0000") == false {
             let (hash, nounce) = string.sha256(index: block.index!, nounce: foundNounce + 1)
             print(hash)
             foundHash = hash
@@ -56,21 +56,6 @@ final class Blockchain: Content {
 
 extension String {
     func sha256(index: Int, nounce: UInt) -> (String, UInt) {
-        
-        let str = "\(self)\(nounce)\(index)".cString(using: .utf8)
-        let strLen = CUnsignedInt("\(self)\(nounce)\(index)".lengthOfBytes(using: .utf8))
-        let digestLen = Int(CC_SHA256_DIGEST_LENGTH)
-        let result = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLen)
-        
-        _ = CC_SHA256(str, strLen, result)
-        
-        var string = String()
-        for i in 0..<Int(CC_SHA256_DIGEST_LENGTH) {
-            string.append("\(result[i])")
-        }
-        //        print(string)
-        result.deallocate()
-        
-        return (string, nounce)
+        return ("\(self)\(nounce)\(index)".sha256(), nounce)
     }
 }
