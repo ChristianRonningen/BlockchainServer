@@ -6,7 +6,8 @@
 //
 
 import Foundation
-import CommonCrypto
+//import CommonCrypto
+import CryptoSwift
 
 import Vapor
 
@@ -90,24 +91,7 @@ class BlockchainService {
     }
     
     func sha256(string: String, index: Int, nounce: UInt) -> String {
-        
-        let str = "\(string)\(nounce)\(index)".cString(using: .utf8)
-        let strLen = CUnsignedInt("\(string)\(nounce)\(index)".lengthOfBytes(using: .utf8))
-        let digestLen = Int(CC_SHA256_DIGEST_LENGTH)
-        let result = UnsafeMutablePointer<CUnsignedChar>.allocate(capacity: digestLen)
-        defer {
-            result.deallocate()
-        }
-        
-        _ = CC_SHA256(str, strLen, result)
-        
-        var string = String()
-        
-        for i in 0..<Int(CC_SHA256_DIGEST_LENGTH) {
-            string.append("\(result[i])")
-        }
-        
-        return string
+        return "\(string)\(nounce)\(index)".sha256()
     }
     
     func verifyBlock(miner: String, block: Block) throws -> [String: String] {

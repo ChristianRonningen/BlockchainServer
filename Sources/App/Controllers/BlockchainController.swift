@@ -47,15 +47,10 @@ class BlockchainController {
     
     func miner(socket: WebSocket, req: Request) {
         print("socket connected \(socket)")
-//        socket.onError { [weak self] (socket, error) in
-//            if let index = self?.sockets.firstIndex(where: { $0 == socket }) {
-//                sockets.remove(at: index)
-//            }
-//        }
-        
+
         sockets.append(socket)
 
-        socket.onError({ [weak self] (socket, error) in
+        socket.onError({ (socket, error) in
             print("error on socket")
         })
         socket.onCloseCode { (code) in
@@ -63,9 +58,3 @@ class BlockchainController {
         }
     }
 }
-
-//extension WebSocket: Equatable {
-//    static func == (lhs: WebSocket, rhs: WebSocket) -> Bool {
-//        lhs.
-//    }
-//}

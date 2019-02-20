@@ -1,4 +1,4 @@
 module CCryptoOpenSSL {
-    umbrella "/Users/christianronningen/Documents/Projects/BlockchainServer/.build/checkouts/crypto.git--5396892531727936093/Sources/CCryptoOpenSSL/include"
+    umbrella "/Users/christianronningen/Documents/Projects/BlockchainServer/.build/checkouts/crypto.git-4033465180328086213/Sources/CCryptoOpenSSL/include"
     export *
 }
