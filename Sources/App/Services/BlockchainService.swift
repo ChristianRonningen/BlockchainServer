@@ -105,7 +105,12 @@ class BlockchainService {
         
         guard
             let json = try? JSONEncoder().encode(block.transactions),
-            let stringToSha = String(data: json, encoding: .utf8),
+            let stringToSha = String(data: json, encoding: .utf8)
+        else {
+            throw BlockchainServiceError.badBlock("Faulty json")
+        }
+        
+        guard
             hash.hasPrefix("000"),
             sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
         else {
