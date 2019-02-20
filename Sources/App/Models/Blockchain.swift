@@ -23,6 +23,7 @@ final class Blockchain: Content {
         genesisBlock.index = 0
         generateHash(for: genesisBlock)
         blocks.append(genesisBlock)
+        print("Genesis created")
     }
     
     func generateHash(for block: Block) {
@@ -30,13 +31,16 @@ final class Blockchain: Content {
         var foundHash: String = ""
         var foundNounce: UInt = 0
         while foundHash.hasPrefix("0000") == false {
-            let (hash, nounce) = string.sha256(index: block.index!, nounce: foundNounce + 1)
-            print(hash)
-            foundHash = hash
-            foundNounce = nounce
+            autoreleasepool {
+                let nounce = UInt.random(in: 0...UInt.max)
+                let hash = string.sha256(index: block.index!, nounce: nounce)
+                foundHash = hash
+                foundNounce = nounce
+            }
         }
         block.hash = foundHash
         block.nounce = foundNounce
+        
     }
     
     func registerNodes(nodes: [BlockchainNode]) -> [BlockchainNode] {
@@ -55,7 +59,7 @@ final class Blockchain: Content {
 }
 
 extension String {
-    func sha256(index: Int, nounce: UInt) -> (String, UInt) {
-        return ("\(self)\(nounce)\(index)".sha256(), nounce)
+    func sha256(index: Int, nounce: UInt) -> String {
+        return "\(self)\(nounce)\(index)".sha256()
     }
 }
