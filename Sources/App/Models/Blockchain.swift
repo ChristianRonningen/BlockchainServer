@@ -9,6 +9,7 @@ import Foundation
 
 import CryptoSwift
 import Vapor
+import ObjectiveC
 
 final class Blockchain: Content {
     var blocks: [Block] = []
