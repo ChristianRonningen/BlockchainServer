@@ -9,7 +9,6 @@ import Foundation
 
 import CryptoSwift
 import Vapor
-import ObjectiveC
 
 final class Blockchain: Content {
     var blocks: [Block] = []
@@ -32,12 +31,19 @@ final class Blockchain: Content {
         var foundHash: String = ""
         var foundNounce: UInt = 0
         while foundHash.hasPrefix("0000") == false {
+#if canImport(ObjectiveC)
             autoreleasepool {
                 let nounce = UInt.random(in: 0...UInt.max)
                 let hash = string.sha256(index: block.index!, nounce: nounce)
                 foundHash = hash
                 foundNounce = nounce
             }
+#else
+            let nounce = UInt.random(in: 0...UInt.max)
+            let hash = string.sha256(index: block.index!, nounce: nounce)
+            foundHash = hash
+            foundNounce = nounce
+#endif
         }
         block.hash = foundHash
         block.nounce = foundNounce
