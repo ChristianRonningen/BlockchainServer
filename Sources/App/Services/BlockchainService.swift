@@ -111,6 +111,7 @@ class BlockchainService {
             throw BlockchainServiceError.badBlock("Faulty json")
         }
         
+        print("\(stringToSha)\(block.nounce!)\(index)")
         guard
             hash.hasPrefix("0000"),
             sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
