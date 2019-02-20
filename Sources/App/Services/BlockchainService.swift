@@ -17,13 +17,13 @@ fileprivate struct Constants {
 
 enum BlockchainServiceError: AbortError, Debuggable {
     case insufficentFunds
-    case badBlock
+    case badBlock(String)
     
     var identifier: String {
         switch self {
         case .insufficentFunds:
             return "insufficentFunds"
-        case .badBlock:
+        case .badBlock(_):
             return "badBlock"
         }
     }
@@ -32,7 +32,7 @@ enum BlockchainServiceError: AbortError, Debuggable {
         switch self {
         case .insufficentFunds:
             return .preconditionFailed
-        case .badBlock:
+        case .badBlock(_):
             return .badRequest
         }
     }
@@ -41,8 +41,8 @@ enum BlockchainServiceError: AbortError, Debuggable {
         switch self {
         case .insufficentFunds:
             return "Insufficent funds"
-        case .badBlock:
-            return "Bad block"
+        case .badBlock(let msg):
+            return "Bad block: \(msg)"
         }
     }
 }
@@ -100,19 +100,24 @@ class BlockchainService {
             let hash = block.hash,
             let previousHash = block.previousHash
         else {
-            throw BlockchainServiceError.badBlock
+            throw BlockchainServiceError.badBlock("missing either hash, index or previousHash")
         }
         
         guard
-            hash.hasPrefix("000"),
             let json = try? JSONEncoder().encode(block.transactions),
             let stringToSha = String(data: json, encoding: .utf8),
-            sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash,
+            hash.hasPrefix("000"),
+            sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
+        else {
+            throw BlockchainServiceError.badBlock("Faulty hash")
+        }
+        
+        guard
             previousHash == blockchain.blocks.last!.hash,
             blockchain.blocks.contains(block) == false,
             index <= blockchain.blocks.count
         else {
-            throw BlockchainServiceError.badBlock
+            throw BlockchainServiceError.badBlock("previous hash not matching or block already added")
         }
         
         let uncomfirmedTransactions = self.uncomfirmedTransactions.filter({
