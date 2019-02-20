@@ -114,7 +114,7 @@ class BlockchainService {
             hash.hasPrefix("000"),
             sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
         else {
-            throw BlockchainServiceError.badBlock("Faulty hash")
+            throw BlockchainServiceError.badBlock("Faulty hash \(hash) not \(sha256(string: stringToSha, index: index, nounce: block.nounce!))")
         }
         
         guard
