@@ -104,8 +104,10 @@ class BlockchainService {
             throw BlockchainServiceError.badBlock("missing either hash, index or previousHash")
         }
         
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
         guard
-            let json = try? JSONEncoder().encode(block.transactions),
+            let json = try? encoder.encode(block.transactions),
             let stringToSha = String(data: json, encoding: .utf8)
         else {
             throw BlockchainServiceError.badBlock("Faulty json")
