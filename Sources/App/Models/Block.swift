@@ -14,7 +14,8 @@ final class Block: Content, Equatable {
     var index: Int? = nil
     var previousHash: String? = nil
     var hash: String? = nil
-    var nounce: UInt? = nil
+    var nounce: UInt32? = nil
+//    var timestamp: String = "\(Date().timeIntervalSince1970)"
     
     init(transactions: [Transaction]) {
         self.transactions = transactions

@@ -51,11 +51,14 @@ class BlockchainService {
     
     private (set) var blockchain: Blockchain
     private var uncomfirmedTransactions: [Transaction] = []
-    private var miners: [HTTPPeer] = []
+    private var nodes: Set<BlockchainNode> = []
     
     init() {
         let genesis = Block(transactions: [])
         self.blockchain = Blockchain(genesisBlock: genesis)
+        
+        // Main node
+//        nodes.insert(BlockchainNode(address: "https://infinite-scrubland-12646.herokuapp.com"))
     }
     
     func getBlockchain() -> Blockchain {
@@ -66,12 +69,13 @@ class BlockchainService {
         return Block(transactions: transactions)
     }
     
-    func registerNodes(nodes: [BlockchainNode]) -> [BlockchainNode] {
-        return blockchain.registerNodes(nodes: nodes)
+    func registerNodes(node: BlockchainNode) -> BlockchainNode {
+        self.nodes.insert(node)
+        return node
     }
     
-    func getNodes() -> [BlockchainNode] {
-        return blockchain.nodes
+    func getNodes() -> Set<BlockchainNode> {
+        return nodes
     }
     
     func addTransaction(transaction: Transaction) throws -> Transaction {
@@ -90,7 +94,7 @@ class BlockchainService {
         return block
     }
     
-    func sha256(string: String, index: Int, nounce: UInt) -> String {
+    func sha256(string: String, index: Int, nounce: UInt32) -> String {
         return "\(string)\(nounce)\(index)".sha256()
     }
     
@@ -115,7 +119,7 @@ class BlockchainService {
         
         print("\(stringToSha)\(block.nounce!)\(index)")
         guard
-            hash.hasPrefix("0000"),
+            hash.hasPrefix("00000"),
             sha256(string: stringToSha, index: index, nounce: block.nounce!) == hash
         else {
             print("verifying \(stringToSha) index: \(index) nounce: \(block.nounce!)")
@@ -143,18 +147,25 @@ class BlockchainService {
         return ["success": "block mined successfully"]
     }
     
-    func resolve(completion: @escaping (Blockchain) -> ()) {
-        let nodes = blockchain.nodes
+    func resolve(completion: @escaping (Blockchain?, Error?) -> ()) {
+        guard nodes.isEmpty == false else {
+            completion(nil, nil)
+            return
+        }
         for node in nodes {
             let url = URL(string: "\(node.address)/api/blockchain")!
             let task = URLSession.shared.dataTask(with: url) { (data, _, _) in
                 if let data = data {
-                    let blockchain = try! JSONDecoder().decode(Blockchain.self, from: data)
-                    if self.blockchain.blocks.count > blockchain.blocks.count {
-                        completion(self.blockchain)
-                    } else {
-                        self.blockchain = blockchain
-                        completion(blockchain)
+                    do {
+                        let blockchain = try JSONDecoder().decode(Blockchain.self, from: data)
+                        if self.blockchain.blocks.count > blockchain.blocks.count {
+                            completion(self.blockchain, nil)
+                        } else {
+                            self.blockchain = blockchain
+                            completion(blockchain, nil)
+                        }
+                    } catch let error {
+                        completion(nil, error)
                     }
                 }
             }

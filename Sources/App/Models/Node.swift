@@ -16,3 +16,14 @@ final class BlockchainNode: Content {
         self.address = address
     }
 }
+
+extension BlockchainNode: Hashable, Equatable {
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self.address)
+    }
+    
+    static func ==(lhs: BlockchainNode, rhs: BlockchainNode) -> Bool {
+        return lhs.address == rhs.address
+    }
+}

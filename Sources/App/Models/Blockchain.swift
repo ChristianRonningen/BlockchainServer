@@ -12,7 +12,6 @@ import Vapor
 
 final class Blockchain: Content {
     var blocks: [Block] = []
-    private (set) var nodes: [BlockchainNode] = []
     
     enum CodingKeys: String, CodingKey {
         case blocks = "blocks"
@@ -29,17 +28,17 @@ final class Blockchain: Content {
     func generateHash(for block: Block) {
         let string = String(data: try! JSONEncoder().encode(block.transactions), encoding: .utf8)!
         var foundHash: String = ""
-        var foundNounce: UInt = 0
+        var foundNounce: UInt32 = 0
         while foundHash.hasPrefix("0000") == false {
 #if canImport(ObjectiveC)
             autoreleasepool {
-                let nounce = UInt.random(in: 0...UInt.max)
+                let nounce = UInt32.random(in: 0...UInt32.max)
                 let hash = string.sha256(index: block.index!, nounce: nounce)
                 foundHash = hash
                 foundNounce = nounce
             }
 #else
-            let nounce = UInt.random(in: 0...UInt.max)
+            let nounce = UInt32.random(in: 0...UInt32.max)
             let hash = string.sha256(index: block.index!, nounce: nounce)
             foundHash = hash
             foundNounce = nounce
@@ -48,11 +47,6 @@ final class Blockchain: Content {
         block.hash = foundHash
         block.nounce = foundNounce
         
-    }
-    
-    func registerNodes(nodes: [BlockchainNode]) -> [BlockchainNode] {
-        self.nodes.append(contentsOf: nodes)
-        return self.nodes
     }
     
     func addBlock(_ block: Block) -> Bool {
@@ -66,7 +60,7 @@ final class Blockchain: Content {
 }
 
 extension String {
-    func sha256(index: Int, nounce: UInt) -> String {
+    func sha256(index: Int, nounce: UInt32) -> String {
         return "\(self)\(nounce)\(index)".sha256()
     }
 }

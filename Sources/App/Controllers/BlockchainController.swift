@@ -11,6 +11,7 @@ import Vapor
 class BlockchainController {
     private (set) var blockchainService: BlockchainService
     var sockets: [WebSocket] = []
+    
     init() {
         self.blockchainService = BlockchainService()
     }
@@ -43,6 +44,22 @@ class BlockchainController {
         } else {
             return 0
         }
+    }
+    
+    func resolve(req: Request) -> Future<Blockchain> {
+        let promise: Promise<Blockchain> = req.eventLoop.newPromise()
+        blockchainService.resolve { (blockchain, error) in
+            if let blockchain = blockchain {
+                promise.succeed(result: blockchain)
+            } else if let error = error {
+                promise.fail(error: error)
+            }
+        }
+        return promise.futureResult
+    }
+ 
+    func registerNode(req: Request, node: BlockchainNode) -> BlockchainNode {
+        return blockchainService.registerNodes(node: node)
     }
     
     func miner(socket: WebSocket, req: Request) {
